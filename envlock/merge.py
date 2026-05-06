@@ -90,3 +90,20 @@ def merge_env_files(
     base = parse_env_file(base_path)
     other = parse_env_file(other_path)
     return merge_envs(base, other, strategy=strategy)
+
+
+def apply_merge_result(result: MergeResult, output_path: str) -> None:
+    """Write the merged env dict from a MergeResult to a .env file.
+
+    Raises MergeConflictError if the result still has unresolved conflicts,
+    since writing a conflicted state would produce a broken .env file.
+    """
+    if result.has_conflicts:
+        conflict_keys = ", ".join(k for k, _, _ in result.conflicts)
+        raise MergeConflictError(
+            f"Cannot write merge result with unresolved conflicts: {conflict_keys}"
+        )
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        for key, value in sorted(result.merged.items()):
+            f.write(f"{key}={value}\n")
