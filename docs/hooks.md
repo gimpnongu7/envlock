@@ -64,3 +64,14 @@ install_hooks(repo)
 print(hooks_status(repo))  # {'post-checkout': True, 'post-merge': True}
 uninstall_hooks(repo)
 ```
+
+### Installing individual hooks
+
+If you only want a specific hook, pass a list of hook names:
+
+```python
+install_hooks(repo, hooks=["post-checkout"])
+```
+
+This is useful when, for example, you only care about branch switches and not
+merges.
