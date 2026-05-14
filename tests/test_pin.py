@@ -65,3 +65,13 @@ def test_pin_creates_directory(tmp_path):
     deep_dir = tmp_path / "a" / "b" / "c"
     pin_snapshot(deep_dir, "x", "snap_x")
     assert resolve_pin(deep_dir, "x") == "snap_x"
+
+
+def test_list_pins_after_unpin(pin_dir):
+    """Ensure unpinned aliases are no longer returned by list_pins."""
+    pin_snapshot(pin_dir, "stable", "snap_001")
+    pin_snapshot(pin_dir, "canary", "snap_002")
+    unpin(pin_dir, "canary")
+    pins = list_pins(pin_dir)
+    assert "canary" not in pins
+    assert pins == {"stable": "snap_001"}
