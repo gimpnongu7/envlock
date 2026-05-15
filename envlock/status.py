@@ -30,6 +30,15 @@ class StatusReport:
         lint_ok = self.lint is None or self.lint.ok()
         return not self.warnings and lint_ok and not self.reminder.needs_reminder
 
+    def summary(self) -> str:
+        """Return a short one-line summary suitable for logging or CLI output."""
+        state = "OK" if self.ok() else "ISSUES FOUND"
+        return (
+            f"{state} | env={'present' if self.env_exists else 'missing'} "
+            f"| snapshots={self.snapshot_count} "
+            f"| warnings={len(self.warnings)}"
+        )
+
 
 def get_status(
     env_path: Path,
