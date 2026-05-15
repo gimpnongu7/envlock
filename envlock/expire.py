@@ -28,13 +28,21 @@ def _meta_path(snapshot_dir: Path, snapshot_id: str) -> Path:
     return snapshot_dir / f"{snapshot_id}.meta.json"
 
 
+def _load_meta(meta: Path) -> dict:
+    """Read and parse a metadata file, raising ExpireError on failure."""
+    try:
+        return json.loads(meta.read_text())
+    except json.JSONDecodeError as exc:
+        raise ExpireError(f"Malformed metadata file '{meta}': {exc}") from exc
+
+
 def set_expiry(snapshot_dir: Path, snapshot_id: str, expires_at: datetime) -> ExpiryRecord:
     """Attach an expiry timestamp to a snapshot's metadata."""
     meta = _meta_path(snapshot_dir, snapshot_id)
     if not meta.exists():
         raise ExpireError(f"No metadata found for snapshot '{snapshot_id}'")
 
-    data = json.loads(meta.read_text())
+    data = _load_meta(meta)
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
     data["expires_at"] = expires_at.isoformat()
@@ -54,7 +62,7 @@ def get_expiry(snapshot_dir: Path, snapshot_id: str) -> Optional[ExpiryRecord]:
     if not meta.exists():
         raise ExpireError(f"No metadata found for snapshot '{snapshot_id}'")
 
-    data = json.loads(meta.read_text())
+    data = _load_meta(meta)
     raw = data.get("expires_at")
     if raw is None:
         return None
@@ -90,6 +98,8 @@ def clear_expiry(snapshot_dir: Path, snapshot_id: str) -> None:
     if not meta.exists():
         raise ExpireError(f"No metadata found for snapshot '{snapshot_id}'")
 
-    data = json.loads(meta.read_text())
-    data.pop("expires_at", None)
+    data = _load_meta(meta)
+    if "expires_at" not in data:
+        return
+    data.pop("expires_at")
     meta.write_text(json.dumps(data, indent=2))
