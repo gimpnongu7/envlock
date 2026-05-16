@@ -28,6 +28,23 @@ def _parse_dotenv_text(text: str) -> Dict[str, str]:
     return result
 
 
+def import_from_dotenv(source: Path) -> Dict[str, str]:
+    """Load env vars from a .env-style file.
+
+    Args:
+        source: Path to the .env file to parse.
+
+    Returns:
+        A dict of key/value pairs parsed from the file.
+
+    Raises:
+        ImportError: If the file does not exist.
+    """
+    if not source.exists():
+        raise ImportError(f"Source file not found: {source}")
+    return _parse_dotenv_text(source.read_text(encoding="utf-8"))
+
+
 def import_from_json(source: Path) -> Dict[str, str]:
     """Load env vars from a JSON file (flat key/value object)."""
     if not source.exists():
