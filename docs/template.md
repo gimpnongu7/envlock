@@ -62,8 +62,26 @@ DB_PORT=CHANGEME
 SECRET_KEY=CHANGEME
 ```
 
+## CLI
+
+You can also generate a template directly from the command line:
+
+```bash
+# Basic usage (writes to .env.template)
+envlock template .env
+
+# Specify output path and placeholder
+envlock template .env .env.example --placeholder CHANGEME
+
+# Overwrite an existing template file
+envlock template .env --overwrite
+```
+
 ## Notes
 
 - Lines that do not match the `KEY=value` pattern are preserved verbatim.
 - A `TemplateError` is raised if the source file does not exist or if the
   output file already exists and `overwrite=False`.
+- Inline comments (e.g. `DB_PORT=5432  # default port`) are stripped along
+  with the value; only standalone comment lines are kept when
+  `include_comments=True`.
