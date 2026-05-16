@@ -60,6 +60,13 @@ def test_cmd_unlock_not_locked_exits(env_file):
     assert exc_info.value.code == 1
 
 
+def test_cmd_unlock_missing_env_exits(tmp_path):
+    """Unlocking a non-existent file should exit with code 1."""
+    with pytest.raises(SystemExit) as exc_info:
+        cmd_unlock(_ns(env_file=str(tmp_path / "missing.env")))
+    assert exc_info.value.code == 1
+
+
 def test_cmd_lock_status_unlocked(env_file, capsys):
     cmd_lock_status(_ns(env_file=str(env_file)))
     out = capsys.readouterr().out
